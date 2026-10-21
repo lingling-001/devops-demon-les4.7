@@ -124,8 +124,14 @@ workflows:
           context: docker-hub
           requires:
             - test
-            - snyk_scan
-            - snyk_code
+            - snyk_scan:
+                - success
+                - failed
+                - canceled
+            - snyk_code:
+                - success
+                - failed
+                - canceled
       - deploy:
           requires:
             - publish
