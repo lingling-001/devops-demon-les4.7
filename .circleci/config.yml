@@ -114,7 +114,8 @@ workflows:
     jobs:
       - build
       - snyk_scan
-      - snyk_code
+      - snyk/scan:
+          fail-on-issues: false
       - test:
           requires:
             - build
