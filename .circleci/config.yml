@@ -107,6 +107,21 @@ jobs:
       - run:
           name: Redeploy latest image on Railway
           command: |
+            # Accept either RAILWAY_TOKEN or RAILWAY_API_TOKEN from CircleCI secrets.
+            if [ -z "$RAILWAY_TOKEN" ] && [ -n "$RAILWAY_API_TOKEN" ]; then
+              export RAILWAY_TOKEN="$RAILWAY_API_TOKEN"
+            fi
+
+            if [ -z "$RAILWAY_TOKEN" ]; then
+              echo "RAILWAY_TOKEN is missing. Add RAILWAY_TOKEN (or RAILWAY_API_TOKEN) in CircleCI env/context."
+              exit 1
+            fi
+
+            if [ -z "$RAILWAY_SERVICE_ID" ]; then
+              echo "RAILWAY_SERVICE_ID is missing. Add it in CircleCI env/context."
+              exit 1
+            fi
+
             echo "Asking Railway to redeploy the latest image..."
             npx --yes @railway/cli redeploy --service "$RAILWAY_SERVICE_ID" --yes
             echo "Railway is now pulling $DOCKER_USERNAME/devops-demo:latest from Docker Hub."
@@ -133,5 +148,6 @@ workflows:
                 - failed
                 - canceled
       - deploy:
+          context: docker-hub
           requires:
             - publish
